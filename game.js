@@ -2,8 +2,8 @@
 
 class Vector {
     constructor (x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
+        this.x = parseInt(x);
+        this.y = parseInt(y);
     }
 
     plus (vector) {
@@ -15,6 +15,19 @@ class Vector {
 
     times (multiplier) {
         return new Vector(this.x * multiplier, this.y * multiplier);
+    }
+
+    revert () {
+        if (this.x > 0) {
+            this.x -= this.x * 2;
+        } else {
+            this.x += this.x * 2;
+        }
+        if (this.y > 0) {
+            this.y -= this.y * 2;
+        } else {
+            this.y += this.y * 2;
+        }
     }
 }
 
@@ -178,26 +191,168 @@ class Level {
 }
 
 class LevelParser {
+    constructor (actorsDict) {
+        if (actorsDict === undefined) {
+            actorsDict = [];
+        }
+        this.actorsDict = actorsDict;
+        this.symbols = {
+            'x': 'wall',
+            '!': 'lava'
+        }
+    }
 
+    actorFromSymbol (symbol) {
+        return this.actorsDict[symbol];
+    }
+
+    obstacleFromSymbol (symbol) {
+        return this.symbols[symbol];
+    }
+
+    createGrid (strings) {
+        let result = [];
+        for (let stringsNumber in strings) {
+            result[stringsNumber] = [];
+            for (let symbolsNumber in strings[stringsNumber]) {
+                if (strings !== undefined && 
+                    strings[stringsNumber] !== undefined && 
+                    strings[stringsNumber][symbolsNumber] !== undefined) {
+                    let symbol = strings[stringsNumber][symbolsNumber];
+                    if (this.actorFromSymbol(symbol) === undefined) {
+                        result[stringsNumber][symbolsNumber] = this.obstacleFromSymbol(symbol);
+                    }
+                } else {
+                    result[stringsNumber][symbolsNumber] = undefined;
+                }
+            }
+        }
+        return result;
+    }
+
+    createActors (strings) {
+        let result = [];
+        for (let stringsNumber in strings) {
+            for (let symbolsNumber in strings[stringsNumber]) {
+                if (strings !== undefined && 
+                    strings[stringsNumber] !== undefined && 
+                    strings[stringsNumber][symbolsNumber] !== undefined) {
+                    let symbol = strings[stringsNumber][symbolsNumber];
+                    let className = this.actorFromSymbol(symbol);
+                    if (className !== undefined && typeof className === 'function') {
+                        let newObject = new className(new Vector(symbolsNumber, stringsNumber));
+                        if ((newObject instanceof Actor) || (newObject.constructor === Actor.constructor)) {
+                            result.push(newObject);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    parse (strings) {
+        return new Level(this.createGrid(strings), this.createActors(strings));
+    }
 }
 
-class Fireball {
+class Fireball extends Actor {
+    constructor (pos = new Vector(0, 0), speed = new Vector(0, 0)) {
+        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor) && 
+            !(speed instanceof Vector) && !(speed.constructor === Vector.constructor)) {
+            throw (new Error('Параметры должен быть типа Vector или не заданы'));
+        }
+        super(pos, new Vector(1, 1), speed);
+    }
 
+    get type () {
+        return 'fireball';
+    }
+
+    getNextPosition (time = 1) {
+        time = parseInt(time);
+        return this.pos.plus(this.speed.times(time));
+    }
+
+    handleObstacle () {
+        this.speed.revert();
+    }
+
+    act (time, level) {
+        let nextPosition = this.getNextPosition(time);
+        if (level.obstacleAt(nextPosition, this.size) === undefined) {
+            this.pos = nextPosition;
+        } else {
+            this.handleObstacle();
+        }
+    }
 }
 
 class HorizontalFireball extends Fireball {
-
+    constructor (pos = new Vector(0, 0)) {
+        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor) && 
+            !(speed instanceof Vector) && !(speed.constructor === Vector.constructor)) {
+            throw (new Error('Параметры должен быть типа Vector или не заданы'));
+        }
+        super(pos, new Vector(2, 0));
+    }
 }
 
 class VerticalFireball extends Fireball {
-
+    constructor (pos = new Vector(0, 0)) {
+        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor) && 
+            !(speed instanceof Vector) && !(speed.constructor === Vector.constructor)) {
+            throw (new Error('Параметры должен быть типа Vector или не заданы'));
+        }
+        super(pos, new Vector(0, 2));
+    }
 }
 
 class FireRain extends Fireball {
+    constructor (pos = new Vector(0, 0)) {
+        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor) && 
+            !(speed instanceof Vector) && !(speed.constructor === Vector.constructor)) {
+            throw (new Error('Параметры должен быть типа Vector или не заданы'));
+        }
+        super(pos, new Vector(0, 3));
+        this.startingPos = pos;
+    }
 
+    handleObstacle () {
+        this.pos = this.startingPos;
+    }
 }
 
-class Coin {
+class Coin extends Actor {
+    constructor (pos = new Vector(0, 0)) {
+        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)){
+            throw (new Error('Параметры должен быть типа Vector или не заданы'));
+        }
+        super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6), new Vector(0, 0));
+        this.springSpeed = 8;
+        this.springDist = 0.07;
+        this.spring = Math.random() * 2 * Math.PI;
+    }
+
+    get type () {
+        return 'coin';
+    }
+
+    updateSpring (time = 1) {
+        this.spring += this.springSpeed * time;
+    }
+
+    getSpringVector () {
+        return new Vector(0, Math.sin(this.spring) * this.springDist);
+    }
+
+    getNextPosition () {
+
+    }
+
+    act (time) {
+
+    }
 
 }
 
