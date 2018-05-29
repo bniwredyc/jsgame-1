@@ -2,8 +2,8 @@
 
 class Vector {
     constructor (x = 0, y = 0) {
-        this.x = parseInt(x);
-        this.y = parseInt(y);
+        this.x = parseFloat(x);
+        this.y = parseFloat(y);
     }
 
     plus (vector) {
@@ -329,6 +329,7 @@ class Coin extends Actor {
             throw (new Error('Параметры должен быть типа Vector или не заданы'));
         }
         super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6), new Vector(0, 0));
+        this.startingPos = this.pos;
         this.springSpeed = 8;
         this.springDist = 0.07;
         this.spring = Math.random() * 2 * Math.PI;
@@ -346,12 +347,13 @@ class Coin extends Actor {
         return new Vector(0, Math.sin(this.spring) * this.springDist);
     }
 
-    getNextPosition () {
-
+    getNextPosition (time = 1) {
+        this.spring += this.springSpeed * time;
+        return this.startingPos.plus(this.getSpringVector());
     }
 
     act (time) {
-
+        this.pos = this.getNextPosition(time);
     }
 
 }
@@ -368,3 +370,22 @@ class Player extends Actor {
         return 'player';
     }
 }
+
+const schema = [
+  '         ',
+  '         ',
+  '    =    ',
+  '       o ',
+  '     !xxx',
+  ' @       ',
+  'xxx!     ',
+  '         '
+];
+const actorDict = {
+  '@': Player,
+  '=': HorizontalFireball
+}
+const parser = new LevelParser(actorDict);
+const level = parser.parse(schema);
+runLevel(level, DOMDisplay)
+  .then(status => console.log(`Игрок ${status}`));
