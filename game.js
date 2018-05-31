@@ -361,37 +361,6 @@ class Player extends Actor {
     }
 }
 
-const schemas = [
-    [
-      '             o             ',
-      '                           ',
-      '                 o         ',
-      '             | xxxxx       ',
-      '                        o  ',
-      '                      xxxxx',
-      '       o           =       ',
-      '     !xxxx                 ',
-      '                           ',
-      ' @       o      o          ',
-      'xxx!   xxxxxx  xxxx        ',
-      '                           '
-    ],
-    [
-      '                           ',
-      '                           ',
-      '                   =       ',
-      '         |                 ',
-      '                   =       ',
-      '                           ',
-      '                   =       ',
-      '    o    |                 ',
-      '                           ',
-      ' @             o        o  ',
-      'xxxxxxx  | !!xxxxx!!!xxxxxx',
-      '                           '
-    ]
-];
-
 const actorDict = {
   '@': Player,
   'o': Coin,
@@ -400,15 +369,14 @@ const actorDict = {
   '=': HorizontalFireball
 }
 
-startGame();
-
 function startGame() {
     const parser = new LevelParser(actorDict);
 
-    loadLevels().then(lvl => {console.log(lvl)});
-    
-    runGame(schemas, parser, DOMDisplay)
+    loadLevels()
+        .then(jsonSchemas => {return runGame(JSON.parse(jsonSchemas), parser, DOMDisplay)})
         .then(status => {return confirm('Вы выиграли, сыграем еще раз?');})
-            .then(result => {if (result) startGame();})
-                .catch(error => console.log(error));
+        .then(result => {if (result) startGame();})
+        .catch(error => console.log(error));
 }
+
+startGame();
