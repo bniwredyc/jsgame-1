@@ -18,16 +18,8 @@ class Vector {
     }
 
     revert () {
-        if (this.x > 0) {
-            this.x -= this.x * 2;
-        } else {
-            this.x += this.x * 2;
-        }
-        if (this.y > 0) {
-            this.y -= this.y * 2;
-        } else {
-            this.y += this.y * 2;
-        }
+        this.x = -this.x;
+        this.y = -this.y;
     }
 }
 
@@ -170,7 +162,7 @@ class Level {
 
     playerTouched (type, actor) {
         if (this.status !== null) {
-            throw (new Error('Игра уже завершена'));
+            return false;
         }
         if (!(actor === undefined) && !(actor instanceof Actor) && !(actor.constructor === Actor.constructor)) {
             throw (new Error('Второй параметр должен быть не задан или иметь тип Actor'));
@@ -270,7 +262,6 @@ class Fireball extends Actor {
     }
 
     getNextPosition (time = 1) {
-        time = parseInt(time);
         return this.pos.plus(this.speed.times(time));
     }
 
@@ -280,11 +271,10 @@ class Fireball extends Actor {
 
     act (time, level) {
         let nextPosition = this.getNextPosition(time);
-        if (level.obstacleAt(nextPosition, this.size) === undefined) {
-            this.pos = nextPosition;
-        } else {
+        if (level.obstacleAt(nextPosition, this.size) !== undefined) {
             this.handleObstacle();
         }
+        this.pos = nextPosition;
     }
 }
 
@@ -371,21 +361,54 @@ class Player extends Actor {
     }
 }
 
-const schema = [
-  '         ',
-  '         ',
-  '    =    ',
-  '       o ',
-  '     !xxx',
-  ' @       ',
-  'xxx!     ',
-  '         '
+const schemas = [
+    [
+      '             o             ',
+      '                           ',
+      '                 o         ',
+      '             | xxxxx       ',
+      '                        o  ',
+      '                      xxxxx',
+      '       o           =       ',
+      '     !xxxx                 ',
+      '                           ',
+      ' @       o      o          ',
+      'xxx!   xxxxxx  xxxx        ',
+      '                           '
+    ],
+    [
+      '                           ',
+      '                           ',
+      '                   =       ',
+      '         |                 ',
+      '                   =       ',
+      '                           ',
+      '                   =       ',
+      '    o    |                 ',
+      '                           ',
+      ' @             o        o  ',
+      'xxxxxxx  | !!xxxxx!!!xxxxxx',
+      '                           '
+    ]
 ];
+
 const actorDict = {
   '@': Player,
+  'o': Coin,
+  '|': VerticalFireball,
+  'v': FireRain,
   '=': HorizontalFireball
 }
-const parser = new LevelParser(actorDict);
-const level = parser.parse(schema);
-runLevel(level, DOMDisplay)
-  .then(status => console.log(`Игрок ${status}`));
+
+startGame();
+
+function startGame() {
+    const parser = new LevelParser(actorDict);
+
+    loadLevels().then(lvl => {console.log(lvl)});
+    
+    runGame(schemas, parser, DOMDisplay)
+        .then(status => {return confirm('Вы выиграли, сыграем еще раз?');})
+            .then(result => {if (result) startGame();})
+                .catch(error => console.log(error));
+}
