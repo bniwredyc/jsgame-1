@@ -2,8 +2,8 @@
 
 class Vector {
     constructor (x = 0, y = 0) {
-        this.x = parseFloat(x);
-        this.y = parseFloat(y);
+        this.x = x;
+        this.y = y;
     }
 
     plus (vector) {
@@ -18,7 +18,7 @@ class Vector {
     }
 
     revert () {
-        return new Vector(parseFloat(-this.x), parseFloat(-this.y));
+        return new Vector(-parseFloat(this.x), -parseFloat(this.y));
     }
 }
 
@@ -85,12 +85,17 @@ class Level {
         this.actors = actors.slice();
         this.status = null;
         this.finishDelay = 1;
-        this.width = this.grid.length === 0 ? 0 : this.grid.reduce((max, cur) => cur.length > max ? cur.length : max, 0);
-        Object.defineProperty(this, 'width', { writable: false });
+
+        const _width = Symbol('width');
+        this[this._width] = this.grid.length === 0 ? 0 : this.grid.reduce((max, cur) => cur.length > max ? cur.length : max, 0);
     }
 
     get player () {
         return this.actors.find(obj => {return obj.type === "player"});
+    }
+
+    get width () {
+        return this[this._width];
     }
 
     get height () {
