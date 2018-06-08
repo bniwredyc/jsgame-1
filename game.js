@@ -7,7 +7,7 @@ class Vector {
     }
 
     plus (vector) {
-        if (!(vector instanceof Vector) && !(vector.constructor === Vector.constructor)) {
+        if (!(vector instanceof Vector)) {
             throw (new Error('Можно прибавлять к вектору только вектор типа Vector'));
         }
         return new Vector(this.x + vector.x, this.y + vector.y);
@@ -24,9 +24,9 @@ class Vector {
 
 class Actor {
     constructor (pos = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) {
-        if ((!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)) || 
-            (!(size instanceof Vector) && !(size.constructor === Vector.constructor)) || 
-            (!(speed instanceof Vector) && !(speed.constructor === Vector.constructor))) {
+        if (!(pos instanceof Vector) || 
+            !(size instanceof Vector) || 
+            !(speed instanceof Vector)) {
             throw (new Error('Все параметры должны быть типа Vector или не заданы'));
         }
         this.pos = pos;
@@ -35,7 +35,7 @@ class Actor {
     }
 
     isIntersect (obj) {
-        if (!(obj instanceof Actor) && !(obj.constructor === Actor.constructor)) {
+        if (!(obj instanceof Actor)) {
             throw (new Error('Параметр должен быть типа Actor'));
         }
         if (obj === this) {
@@ -107,15 +107,15 @@ class Level {
     }
 
     actorAt (actor) {
-        if (!(actor instanceof Actor) && !(actor.constructor === Actor.constructor)) {
+        if (!(actor instanceof Actor)) {
             throw (new Error('Параметр должен быть типа Actor'));
         }
         return this.actors.find(obj => actor.isIntersect(obj));
     }
 
     obstacleAt (pos, size) {
-        if ((!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)) || 
-            (!(size instanceof Vector) && !(size.constructor === Vector.constructor))) {
+        if (!(pos instanceof Vector) || 
+            !(size instanceof Vector)) {
             throw (new Error('Все параметры должны быть типа Vector'));
         }
         const minX = Math.min(pos.x, pos.x + size.x),
@@ -151,7 +151,7 @@ class Level {
     }
 
     removeActor (actor) {
-        if (!(actor instanceof Actor) && !(actor.constructor === Actor.constructor)) {
+        if (!(actor instanceof Actor)) {
             throw (new Error('Параметр должен быть типа Actor'));
         }
         let index = this.actors.indexOf(actor);
@@ -165,7 +165,7 @@ class Level {
     }
 
     playerTouched (type, actor) {
-        if (!(actor === undefined) && !(actor instanceof Actor) && !(actor.constructor === Actor.constructor)) {
+        if (!(actor === undefined) && !(actor instanceof Actor)) {
             throw (new Error('Второй параметр должен быть не задан или иметь тип Actor'));
         }
         if (this.status === null) {
@@ -229,8 +229,8 @@ class LevelParser {
 
 class Fireball extends Actor {
     constructor (pos = new Vector(0, 0), speed = new Vector(0, 0)) {
-        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor) && 
-            !(speed instanceof Vector) && !(speed.constructor === Vector.constructor)) {
+        if (!(pos instanceof Vector) && 
+            !(speed instanceof Vector)) {
             throw (new Error('Параметры должен быть типа Vector или не заданы'));
         }
         super(pos, new Vector(1, 1), speed);
@@ -260,7 +260,7 @@ class Fireball extends Actor {
 
 class HorizontalFireball extends Fireball {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)) {
+        if (!(pos instanceof Vector)) {
             throw (new Error('Параметр должен быть типа Vector или не задан'));
         }
         super(pos, new Vector(2, 0));
@@ -269,7 +269,7 @@ class HorizontalFireball extends Fireball {
 
 class VerticalFireball extends Fireball {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)) {
+        if (!(pos instanceof Vector)) {
             throw (new Error('Параметр должен быть типа Vector или не задан'));
         }
         super(pos, new Vector(0, 2));
@@ -278,7 +278,7 @@ class VerticalFireball extends Fireball {
 
 class FireRain extends Fireball {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)) {
+        if (!(pos instanceof Vector)) {
             throw (new Error('Параметр должен быть типа Vector или не задан'));
         }
         super(pos, new Vector(0, 3));
@@ -292,7 +292,7 @@ class FireRain extends Fireball {
 
 class Coin extends Actor {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)){
+        if (!(pos instanceof Vector)){
             throw (new Error('Параметры должен быть типа Vector или не заданы'));
         }
         super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6), new Vector(0, 0));
@@ -327,7 +327,7 @@ class Coin extends Actor {
 
 class Player extends Actor {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector) && !(pos.constructor === Vector.constructor)) {
+        if (!(pos instanceof Vector)) {
             throw (new Error('Параметр должен быть типа Vector'));
         }
         super(pos.plus(new Vector(0, -0.5)), new Vector(0.8, 1.5));
