@@ -18,6 +18,7 @@ class Vector {
     }
 
     revert () {
+        // parseFloat не нужен
         return new Vector(-parseFloat(this.x), -parseFloat(this.y));
     }
 }
@@ -41,6 +42,8 @@ class Actor {
         if (obj === this) {
             return false;
         }
+        // если выражение это true или false, то проще писать сразу
+        // return <выражение>
         if (obj.left < this.right &&
             obj.right > this.left && 
             obj.top < this.bottom && 
@@ -86,7 +89,9 @@ class Level {
         this.status = null;
         this.finishDelay = 1;
 
+        // тут ошибка посмоттрите внимательно на код
         const _width = Symbol('width');
+        // проверка лишняя
         this[this._width] = this.grid.length === 0 ? 0 : this.grid.reduce((max, cur) => cur.length > max ? cur.length : max, 0);
     }
 
@@ -118,6 +123,8 @@ class Level {
             !(size instanceof Vector)) {
             throw (new Error('Все параметры должны быть типа Vector'));
         }
+        // не объявляйте переменные через запятую
+        // тут должно быть 4 переменные, а не 8 (гранцы ячеек)
         const minX = Math.min(pos.x, pos.x + size.x),
               minXfloor = Math.floor(minX),
               maxX = Math.max(pos.x, pos.x + size.x),
@@ -154,6 +161,7 @@ class Level {
         if (!(actor instanceof Actor)) {
             throw (new Error('Параметр должен быть типа Actor'));
         }
+        // значение присваивается 1 раз - лучше использовать const
         let index = this.actors.indexOf(actor);
         if (index > -1) {
             this.actors.splice(index, 1);
@@ -183,6 +191,7 @@ class Level {
 }
 
 class LevelParser {
+    // некорректное значение по-умолчанию
     constructor (actorsDict = []) {
         this.actorsDict = actorsDict;
         this.symbols = {
@@ -260,6 +269,7 @@ class Fireball extends Actor {
 
 class HorizontalFireball extends Fireball {
     constructor (pos = new Vector(0, 0)) {
+        // эта проверка есть в родительском конструкторе
         if (!(pos instanceof Vector)) {
             throw (new Error('Параметр должен быть типа Vector или не задан'));
         }
