@@ -18,8 +18,7 @@ class Vector {
     }
 
     revert () {
-        // parseFloat не нужен
-        return new Vector(-parseFloat(this.x), -parseFloat(this.y));
+        return new Vector(-this.x, -this.y);
     }
 }
 
@@ -42,15 +41,10 @@ class Actor {
         if (obj === this) {
             return false;
         }
-        // если выражение это true или false, то проще писать сразу
-        // return <выражение>
-        if (obj.left < this.right &&
+        return (obj.left < this.right &&
             obj.right > this.left && 
             obj.top < this.bottom && 
-            obj.bottom > this.top) {
-            return true;
-        } 
-        return false;
+            obj.bottom > this.top);
     }
 
     act () {
@@ -89,10 +83,8 @@ class Level {
         this.status = null;
         this.finishDelay = 1;
 
-        // тут ошибка посмоттрите внимательно на код
-        const _width = Symbol('width');
-        // проверка лишняя
-        this[this._width] = this.grid.length === 0 ? 0 : this.grid.reduce((max, cur) => cur.length > max ? cur.length : max, 0);
+        this._width = Symbol('width');
+        this[this._width] = this.grid.reduce((max, cur) => cur.length > max ? cur.length : max, 0);
     }
 
     get player () {
@@ -123,16 +115,10 @@ class Level {
             !(size instanceof Vector)) {
             throw (new Error('Все параметры должны быть типа Vector'));
         }
-        // не объявляйте переменные через запятую
-        // тут должно быть 4 переменные, а не 8 (гранцы ячеек)
-        const minX = Math.min(pos.x, pos.x + size.x),
-              minXfloor = Math.floor(minX),
-              maxX = Math.max(pos.x, pos.x + size.x),
-              maxXfloor = Math.floor(maxX),
-              minY = Math.min(pos.y, pos.y + size.y),
-              minYfloor = Math.floor(minY),
-              maxY = Math.max(pos.y, pos.y + size.y),
-              maxYfloor = Math.floor(maxY);
+        const minX = Math.min(pos.x, pos.x + size.x);
+        const maxX = Math.max(pos.x, pos.x + size.x);
+        const minY = Math.min(pos.y, pos.y + size.y);
+        const maxY = Math.max(pos.y, pos.y + size.y);
 
         if (maxX > this.width ||
             minX < 0 ||
@@ -143,8 +129,8 @@ class Level {
             return 'lava';
         }
 
-        for (let x = minXfloor; x <= maxXfloor; x++) {
-            for (let y = minYfloor; y <= maxYfloor; y++) {
+        for (let x = Math.floor(minX); x <= Math.floor(maxX); x++) {
+            for (let y = Math.floor(minY); y <= Math.floor(maxY); y++) {
                 const cur = this.grid[y][x];
                 if (cur) {
                     if (cur === 'wall' && 
@@ -161,8 +147,7 @@ class Level {
         if (!(actor instanceof Actor)) {
             throw (new Error('Параметр должен быть типа Actor'));
         }
-        // значение присваивается 1 раз - лучше использовать const
-        let index = this.actors.indexOf(actor);
+        const index = this.actors.indexOf(actor);
         if (index > -1) {
             this.actors.splice(index, 1);
         }
@@ -191,8 +176,7 @@ class Level {
 }
 
 class LevelParser {
-    // некорректное значение по-умолчанию
-    constructor (actorsDict = []) {
+    constructor (actorsDict = new Object()) {
         this.actorsDict = actorsDict;
         this.symbols = {
             'x': 'wall',
@@ -269,28 +253,18 @@ class Fireball extends Actor {
 
 class HorizontalFireball extends Fireball {
     constructor (pos = new Vector(0, 0)) {
-        // эта проверка есть в родительском конструкторе
-        if (!(pos instanceof Vector)) {
-            throw (new Error('Параметр должен быть типа Vector или не задан'));
-        }
         super(pos, new Vector(2, 0));
     }
 }
 
 class VerticalFireball extends Fireball {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector)) {
-            throw (new Error('Параметр должен быть типа Vector или не задан'));
-        }
         super(pos, new Vector(0, 2));
     }
 }
 
 class FireRain extends Fireball {
     constructor (pos = new Vector(0, 0)) {
-        if (!(pos instanceof Vector)) {
-            throw (new Error('Параметр должен быть типа Vector или не задан'));
-        }
         super(pos, new Vector(0, 3));
         this.startingPos = pos;
     }
