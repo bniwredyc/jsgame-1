@@ -18,6 +18,7 @@ class Vector {
     }
 
     revert () {
+        // тут лучше использовать метод times
         return new Vector(-this.x, -this.y);
     }
 }
@@ -83,11 +84,17 @@ class Level {
         this.status = null;
         this.finishDelay = 1;
 
+        // если можно получить доступ к симолу, то теряется смысл его использования
+        // с текущей реализацией поле можно поменять извне вот так:
+        // level[level._width] = 123
         this._width = Symbol('width');
         this[this._width] = this.grid.reduce((max, cur) => cur.length > max ? cur.length : max, 0);
     }
 
     get player () {
+        // лучше задать в конструкторе, чтобы кажджый раз не искать
+        // можно использовать короткую форму записи стрелочной функции
+        // (без фигурных скобок и return)
         return this.actors.find(obj => {return obj.type === "player"});
     }
 
@@ -115,6 +122,10 @@ class Level {
             !(size instanceof Vector)) {
             throw (new Error('Все параметры должны быть типа Vector'));
         }
+
+        // я не могу понять что здесь происходит :(
+        // может быть эта логика работает, но её физический смысл до меня не доходит :(
+        // этот метод нужно упростить
         const minX = Math.min(pos.x, pos.x + size.x);
         const maxX = Math.max(pos.x, pos.x + size.x);
         const minY = Math.min(pos.y, pos.y + size.y);
@@ -129,11 +140,13 @@ class Level {
             return 'lava';
         }
 
+        // почему все округления вниз?
         for (let x = Math.floor(minX); x <= Math.floor(maxX); x++) {
             for (let y = Math.floor(minY); y <= Math.floor(maxY); y++) {
                 const cur = this.grid[y][x];
                 if (cur) {
-                    if (cur === 'wall' && 
+                    // откуда вот эта проверка?
+                    if (cur === 'wall' &&
                         (x === maxX || y === maxY)){
                         continue;
                     }
@@ -176,6 +189,7 @@ class Level {
 }
 
 class LevelParser {
+    // лучше писать {}
     constructor (actorsDict = new Object()) {
         this.actorsDict = actorsDict;
         this.symbols = {
@@ -194,6 +208,7 @@ class LevelParser {
 
     createGrid (strings) {
         return strings.map(line => line.split('').map(symbol => {
+                // зачем эта проверка?
                 if (!this.actorFromSymbol(symbol)) {
                     return this.obstacleFromSymbol(symbol);
                 }
@@ -205,7 +220,10 @@ class LevelParser {
         const result = [];
         strings.forEach((string, stringNumber) => string.split('').forEach((symbol, symbolNumber) => {
             const className = this.actorFromSymbol(symbol);
+            // первая половина проверки лишняя
             if (className && typeof className === 'function') {
+                // если значение присваивается переменной один раз,
+                // то лучше использовать const
                 let newObject = new className(new Vector(symbolNumber, stringNumber));
                 if (newObject instanceof Actor) {
                     result.push(newObject);
