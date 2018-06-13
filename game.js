@@ -176,7 +176,7 @@ class Level {
 }
 
 class LevelParser {
-    constructor (actorsDict = []) {
+    constructor (actorsDict = new Object()) {
         this.actorsDict = actorsDict;
         this.symbols = {
             'x': 'wall',
